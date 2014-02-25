@@ -1,0 +1,10 @@
+This is the Sparse Grids module of the TASMANIAN project
+
+QuickBuild: try typing "make" and see what happens, you need g++ installed
+
+Possible Issues:
+- some Mac users have errors when running the code with gcc 4.4 and OpenMP enabled, either upgrade gcc to a newer version or disable OpenMP in the makefile 
+(i.e. remove "-fopenmp" from the COMPILE_OPTIONS)
+
+
+	
