@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import scipy, scipy.integrate, itertools
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
 
 import pyublas
 import _py_tsg as tsg
@@ -114,9 +116,50 @@ def test1():
 		grid.set_refinement(tolerance, tsg.TypeRefinement.refine_classic)
 		iteration += 1
 
+# return an array of fn applied to each grid point in gridList. last elt of gridList will be the innermost loop
+def apply_fn_to_grid(gridList, fn):
+	xy_list = list(itertools.product(*gridList))
+	xlists = []
+	#f0 = fn(xy_list[0])
+	[xlists.append( [xy[i] for xy in xy_list] ) for i in range(len(gridList))]
+	f_list = [fn(xy) for xy in xy_list]
+	return (xlists, f_list)
+
+# plot the gridpoints of a 2d grid
+def plot_gridpoints_2(grid):
+	assert(grid.get_num_dimensions() == 2)
+	points = grid.get_points()
+	fig = plt.figure()
+	plt.scatter(points[:,0], points[:,1], s=3)
+	print("%d gridpoints" % len(points))
+
+def scatter_grid_2(grid, n_gridpoints=20):
+	assert(grid.get_num_dimensions() == 2)
+	(low, high) = grid.get_transform_AB()	
+	grid1 = scipy.linspace(low[0], high[0], n_gridpoints)
+	grid2 = scipy.linspace(low[1], high[1], n_gridpoints)
+	(xlists, f_list) = apply_fn_to_grid([grid1, grid2], lambda x: grid.evaluate(scipy.array(x)))
+	fig = plt.figure()
+	ax = Axes3D(fig)	
+	ax.scatter3D(xlists[0], xlists[1], f_list, s=3)	
+	return ax
+		
+def test_plot():
+	grid = tsg.TSG()
+	def fn1(x):		return scipy.exp(-x[0]*x[0])*scipy.cos(x[1])
+	dimension = 2
+	outputs = 1
+	precision = 10
+	grid.make_global_grid( dimension, outputs, precision, tsg.TypeDepth.type_basis, tsg.TypeOneDRule.rule_clenshawcurtis, scipy.array([], dtype=int), 0, 0 )
+	points = grid.get_needed_points()
+	values = fn1(points.T)
+	grid.load_needed_points(values)
+	plot_gridpoints_2(grid)
+	scatter_grid_2(grid, 50)
+	
 if __name__ == "__main__":
 	test1()
-
+	test_plot()
 	
 	
 	

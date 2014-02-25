@@ -67,9 +67,9 @@ ifeq ($(COMPILER), gcc)
 	LINK = g++	
 	LINKFLAGS = -shared $(LINKFLAGS_EXE) -fopenmp
 	ifeq ($(DEBUG), 0)
-		CXXFLAGS = -O3 -ffast-math -mtune=native -fPIC -fopenmp
+		CXXFLAGS = -O3 -ffast-math -mtune=native -fPIC -fopenmp -std=c++11
 	else
-		CXXFLAGS = -g -ffast-math -mtune=native -fPIC -fopenmp
+		CXXFLAGS = -g -ffast-math -mtune=native -fPIC -fopenmp -std=c++11
 	endif
 else ifeq ($(COMPILER), msvc)
 	CC = cl.exe
