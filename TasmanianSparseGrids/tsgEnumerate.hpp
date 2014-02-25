@@ -26,11 +26,13 @@
 #define __TASMANIAN_SPARSE_GRID_ENUMERATE_HPP
 
 #if defined(_WIN32) || defined(WIN32) 
-#define _USE_MATH_DEFINES
-#define DLLEXPORT   __declspec( dllexport )
-#include <cmath>
-#include "gamma.hpp"
-#endif
+  #define _USE_MATH_DEFINES
+  #define DLLEXPORT   __declspec( dllexport )
+  #include <cmath>
+  #include "gamma.hpp"
+#else
+  #define DLLEXPORT
+#endif //_WIN32
 
 namespace TasGrid{
 

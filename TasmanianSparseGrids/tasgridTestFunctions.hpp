@@ -26,6 +26,7 @@
 #define __TASMANIAN_TASGRID_FUNCTIONS_HPP
 
 #include "math.h"
+#include <stdio.h>
 
 class BaseFunction{
 public:

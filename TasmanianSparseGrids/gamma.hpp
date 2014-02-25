@@ -11,8 +11,13 @@
 // Note that the functions Gamma and LogGamma are mutually dependent.
 double LogGamma(double);
 double Gamma(double);
-int pow(int x, int y);
-inline double tgamma(double x) { return Gamma(x); }
-inline double lgamma(double x) { return LogGamma(x); }
+
+#if defined(_WIN32) || defined(WIN32)
+  inline int pow(int x, int y) {
+    return (int) pow((double) x, y);
+  }
+  inline double tgamma(double x) { return Gamma(x); }
+  inline double lgamma(double x) { return LogGamma(x); }
+#endif //_WIN32
 
 #endif //_gamma_h_

@@ -1,6 +1,7 @@
 // Visit http://www.johndcook.com/stand_alone_code.html for the source of this code and more like it.
 
 #include <cmath>
+#include <cfloat>
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
@@ -8,9 +9,6 @@
 #include "gamma.hpp"
 
 // Note that the functions Gamma and LogGamma are mutually dependent.
-int pow(int x, int y) {
-  return (int) pow((double) x, y);
-}
 
 double Gamma
 (

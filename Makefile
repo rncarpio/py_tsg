@@ -1,5 +1,5 @@
 
-DEBUG = 1
+DEBUG = 0
 VPATH = TasmanianSparseGrids
 
 ifeq ($(OS),Windows_NT)
@@ -65,11 +65,11 @@ ifeq ($(COMPILER), gcc)
 	CC = gcc
 	CXX = g++ 
 	LINK = g++	
-	LINKFLAGS = -shared $(LINKFLAGS_EXE)
+	LINKFLAGS = -shared $(LINKFLAGS_EXE) -fopenmp
 	ifeq ($(DEBUG), 0)
-		CXXFLAGS = -O2 -fPIC -std=c++11
+		CXXFLAGS = -O3 -ffast-math -mtune=native -fPIC -fopenmp
 	else
-		CXXFLAGS = -g -fPIC -std=c++11
+		CXXFLAGS = -g -ffast-math -mtune=native -fPIC -fopenmp
 	endif
 else ifeq ($(COMPILER), msvc)
 	CC = cl.exe
@@ -92,10 +92,10 @@ endif #msvc
 
 ifeq ($(COMPILER), gcc)
 
-$(BUILD_DIR)/%.o: %.cpp %.hpp
+$(BUILD_DIR)/%.obj: %.cpp %.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCLUDES) $< -o $@
 
-$(BUILD_DIR)/%.o: %.cpp
+$(BUILD_DIR)/%.obj: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(INCLUDES) $< -o $@
 
 _%$(DL_SUFFIX):	$(BUILD_DIR)/%.o
@@ -154,24 +154,34 @@ WROBJFILES = $(foreach file, $(WROBJ), $(BUILD_DIR)/$(file))
 $(BUILD_DIR):
 	mkdir $(BUILD_DIR)
 
-all: $(BUILD_DIR) $(BUILD_DIR)/tasgrid$(EXE_PREFIX) $(BUILD_DIR)/example$(EXE_PREFIX) tasmaniansparsegrid$(DL_SUFFIX)
-		
+ifeq ($(COMPILER), gcc)
+LIBNAME = libtasmaniansparsegrid.so
+$(LIBNAME): $(OBJFILES)
+	$(LINK) -o $@ $(OBJFILES) $(LINKFLAGS)
+
+$(BUILD_DIR)/tasgrid:  libtasmaniansparsegrid$(DL_SUFFIX) $(WROBJFILES)	
+	$(LINK) $(LINKFLAGS_EXE) $(WROBJFILES) -o $@ -L. -ltasmaniansparsegrid
+
+$(BUILD_DIR)/example:  libtasmaniansparsegrid$(DL_SUFFIX) $(BUILD_DIR)/example.obj	
+	$(LINK) $(LINKFLAGS_EXE) -L. -ltasmaniansparsegrid $(BUILD_DIR)/example.obj -o $@
+else
+LIBNAME = tasmaniansparsegrid.dll
+$(LIBNAME): $(OBJFILES)
+	$(LINK) $(LINKFLAGS) $(OBJFILES) /OUT:$@ \
+		/IMPLIB:tasmaniansparsegrid.lib \
+		/MANIFESTFILE:tasmaniansparsegrid.dll.manifest
+
 $(BUILD_DIR)/tasgrid.exe:  tasmaniansparsegrid$(DL_SUFFIX) $(WROBJFILES)	
 	$(LINK) tasmaniansparsegrid.lib $(WROBJFILES) /OUT:$@
 
 $(BUILD_DIR)/example.exe:  tasmaniansparsegrid$(DL_SUFFIX) $(BUILD_DIR)/example.obj	
 	$(LINK) tasmaniansparsegrid.lib $(BUILD_DIR)/example.obj /OUT:$@
 
-ifeq ($(COMPILER), gcc)
-libtasmaniansparsegrid.so: $(OBJFILES)
-	$(LINK) -o $@ $< $(LINKFLAGS) $(LIB_DIRS) $(LIBS)
-else
-tasmaniansparsegrid.dll: $(OBJFILES)
-	$(LINK) $(LINKFLAGS) $(OBJFILES) /OUT:$@ \
-		/IMPLIB:tasmaniansparsegrid.lib \
-		/MANIFESTFILE:tasmaniansparsegrid.dll.manifest
 endif
-			
+
+all: $(BUILD_DIR) $(BUILD_DIR)/tasgrid$(EXE_PREFIX) $(BUILD_DIR)/example$(EXE_PREFIX) \
+	$(LIBNAME)
+		
 clean:
 ifeq ($(COMPILER), gcc)
 	rm -rf $(BUILD_DIR) tasmaniansparsegrid$(DL_SUFFIX)
