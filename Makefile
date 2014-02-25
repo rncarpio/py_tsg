@@ -25,7 +25,7 @@ else
 	PYTHON_LIB_DIRS = $(PYTHON_DIR)/libs
 endif
 PYUBLAS_INC_DIR = .
-INCLUDES = -Isrc -I$(BOOST_INC_DIR) -I$(PYUBLAS_INC_DIR) -I$(EIGEN_DIR) \
+INCLUDES = -Isrc -I$(BOOST_INC_DIR) -I$(PYUBLAS_INC_DIR) \
 	$(foreach dir, $(PYTHON_INC_DIRS), -I$(dir))
 
 #############################
@@ -156,8 +156,13 @@ $(BUILD_DIR):
 
 ifeq ($(COMPILER), gcc)
 LIBNAME = libtasmaniansparsegrid.so
+PYLIBNAME = _py_tsg.so
+
 $(LIBNAME): $(OBJFILES)
 	$(LINK) -o $@ $(OBJFILES) $(LINKFLAGS)
+
+$(PYLIBNAME): $(BUILD_DIR)/tsg_python.obj
+	$(LINK) -o $@ $< $(LINKFLAGS) $(LIB_DIRS) $(LIBS) -L. -ltasmaniansparsegrid
 
 $(BUILD_DIR)/tasgrid:  libtasmaniansparsegrid$(DL_SUFFIX) $(WROBJFILES)	
 	$(LINK) $(LINKFLAGS_EXE) $(WROBJFILES) -o $@ -L. -ltasmaniansparsegrid
@@ -166,11 +171,16 @@ $(BUILD_DIR)/example:  libtasmaniansparsegrid$(DL_SUFFIX) $(BUILD_DIR)/example.o
 	$(LINK) $(LINKFLAGS_EXE) -L. -ltasmaniansparsegrid $(BUILD_DIR)/example.obj -o $@
 else
 LIBNAME = tasmaniansparsegrid.dll
+PYLIBNAME = _py_tsg.pyd
+
 $(LIBNAME): $(OBJFILES)
 	$(LINK) $(LINKFLAGS) $(OBJFILES) /OUT:$@ \
 		/IMPLIB:tasmaniansparsegrid.lib \
 		/MANIFESTFILE:tasmaniansparsegrid.dll.manifest
 
+$(PYLIBNAME): $(BUILD_DIR)/tsg_python.obj
+	$(LINK) $(LINKFLAGS) $(LIB_DIRS) $(LIBS) tasmaniansparsegrid.lib $< /OUT:$@
+		
 $(BUILD_DIR)/tasgrid.exe:  tasmaniansparsegrid$(DL_SUFFIX) $(WROBJFILES)	
 	$(LINK) tasmaniansparsegrid.lib $(WROBJFILES) /OUT:$@
 
@@ -180,7 +190,7 @@ $(BUILD_DIR)/example.exe:  tasmaniansparsegrid$(DL_SUFFIX) $(BUILD_DIR)/example.
 endif
 
 all: $(BUILD_DIR) $(BUILD_DIR)/tasgrid$(EXE_PREFIX) $(BUILD_DIR)/example$(EXE_PREFIX) \
-	$(LIBNAME)
+	$(LIBNAME) $(PYLIBNAME)
 		
 clean:
 ifeq ($(COMPILER), gcc)
