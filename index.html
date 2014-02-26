@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="py_tsg : A Python wrapper around the Tasmanian sparse grid library" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>py_tsg</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/rncarpio/py_tsg">View on GitHub</a>
+
+          <h1 id="project_title">py_tsg</h1>
+          <h2 id="project_tagline">A Python wrapper around the Tasmanian sparse grid library</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/rncarpio/py_tsg/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/rncarpio/py_tsg/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>Project page: <a href="http://rncarpio.github.com/py_tsg">http://rncarpio.github.com/py_tsg</a></p>
+
+<h3>
+<a name="what-is-py_tsg" class="anchor" href="#what-is-py_tsg"><span class="octicon octicon-link"></span></a>What is <code>py_tsg</code>?</h3>
+
+<p><code>py_tsg</code> is a Python wrapper around the <a href="http://tasmanian.ornl.gov/">Tasmanian Sparse Grid Library (TSG)</a> for high-dimensional interpolation and integration using sparse grids (e.g. Smolyak grids).  TSG is written in C++ and supports a variety of polynomial basis functions, anisotropic weights, and adaptive local refinement.
+For more information on TSG, visit <a href="http://tasmanian.ornl.gov/">http://tasmanian.ornl.gov/</a> or look at the <a href="http://tasmanian.ornl.gov/manuals.html">manual</a>.</p>
+
+<p>This version is based on <a href="http://tasmanian.ornl.gov/downloads.html">TSG v1.0, released August 2013</a>. The code has been slightly modified to compile under Windows. The Python wrapper requires <a href="http://www.boost.org/doc/libs/1_55_0/libs/python/doc/index.html">Boost.Python</a> and <a href="http://mathema.tician.de/software/pyublas/">PyUblas</a> to be installed.</p>
+
+<h3>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h3>
+
+<p>Assuming you have <a href="http://www.boost.org/doc/libs/1_55_0/libs/python/doc/index.html">Boost.Python</a> and <a href="http://mathema.tician.de/software/pyublas/">PyUblas</a> already installed, download the files and type <code>make all</code>. The makefile should handle both Linux and Windows (tested with MSVC 2010). A shared library <code>libtasmaniansparsegrid.so</code> or its Windows equivalent should be produced; set your paths to detect this. Another shared library <code>_py_tsg.so</code> or <code>_py_tsg.pyd</code> should be produced; from Python, you can type <code>import _py_tsg</code>.</p>
+
+<h3>
+<a name="interface" class="anchor" href="#interface"><span class="octicon octicon-link"></span></a>Interface</h3>
+
+<p>The interface is a straightforward translation of the C++ API. See the <a href="http://tasmanian.ornl.gov/manuals.html">TSG manual</a> and the file <code>tsg_python.cpp</code> for details.</p>
+
+<h3>
+<a name="examples" class="anchor" href="#examples"><span class="octicon octicon-link"></span></a>Examples</h3>
+
+<p>The following examples are copied from the <code>example.cpp</code> file in the TSG distribution.
+Example 1: </p>
+
+<div class="highlight highlight-python"><pre><span class="c"># EXAMPLE 1:</span>
+<span class="c"># make a classical Smolyak grid using Clenshaw-Curtis quadrature</span>
+<span class="c"># integrate the function f(x,y) = exp( -x^2 ) * cos( y )</span>
+<span class="c"># the exact answer is: 2.513723354063905e+00</span>
+
+<span class="kn">import</span> <span class="nn">scipy</span><span class="o">,</span> <span class="nn">scipy.integrate</span><span class="o">,</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">pyublas</span>
+<span class="kn">import</span> <span class="nn">_py_tsg</span> <span class="kn">as</span> <span class="nn">tsg</span>
+
+<span class="n">grid</span> <span class="o">=</span> <span class="n">tsg</span><span class="o">.</span><span class="n">TSG</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">fn1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>     <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">scipy</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">dimension</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">outputs</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">level</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">make_global_grid</span><span class="p">(</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">tsg</span><span class="o">.</span><span class="n">TypeDepth</span><span class="o">.</span><span class="n">type_level</span><span class="p">,</span> <span class="n">tsg</span><span class="o">.</span><span class="n">TypeOneDRule</span><span class="o">.</span><span class="n">rule_clenshawcurtis</span><span class="p">,</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
+<span class="nb">sum</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="p">[</span><span class="n">w</span><span class="o">*</span><span class="n">fn1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">w</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">weights</span><span class="p">)]</span> <span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">Example 1"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"grid has: </span><span class="si">%d</span><span class="s"> points"</span> <span class="o">%</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_num_points</span><span class="p">())</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"integral is: </span><span class="si">%.17f</span><span class="s">"</span> <span class="o">%</span> <span class="nb">sum</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"error: </span><span class="si">%.17f</span><span class="s">"</span> <span class="o">%</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span> <span class="nb">sum</span> <span class="o">-</span> <span class="mf">2.513723354063905e+00</span> <span class="p">))</span>
+</pre></div>
+
+<p>produces:</p>
+
+<pre><code>Example 1
+grid has: 321 points
+integral is: 2.51372335405531810
+error: 0.00000000000858691
+</code></pre>
+
+<p>Example 2:</p>
+
+<div class="highlight highlight-python"><pre><span class="c"># make a Clenshaw-Curtis rule that interpolates exactly polynomials of order up to 10</span>
+<span class="c"># integrate the function f(x,y) = exp( -x^2 ) * cos( y )</span>
+<span class="c"># exact values is: 6.990131267703512e-01    </span>
+
+<span class="kn">import</span> <span class="nn">scipy</span><span class="o">,</span> <span class="nn">scipy.integrate</span><span class="o">,</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">pyublas</span>
+<span class="kn">import</span> <span class="nn">_py_tsg</span> <span class="kn">as</span> <span class="nn">tsg</span>
+
+<span class="k">def</span> <span class="nf">apply_fn_to_grid</span><span class="p">(</span><span class="n">gridList</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+    <span class="n">xy_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">gridList</span><span class="p">))</span>
+    <span class="n">xlists</span> <span class="o">=</span> <span class="p">[]</span> 
+    <span class="p">[</span><span class="n">xlists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">[</span><span class="n">xy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">xy</span> <span class="ow">in</span> <span class="n">xy_list</span><span class="p">]</span> <span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gridList</span><span class="p">))]</span>
+    <span class="n">f_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">fn</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span> <span class="k">for</span> <span class="n">xy</span> <span class="ow">in</span> <span class="n">xy_list</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">xlists</span><span class="p">,</span> <span class="n">f_list</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">plot_gridpoints_2</span><span class="p">(</span><span class="n">grid</span><span class="p">):</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_num_dimensions</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_points</span><span class="p">()</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"</span><span class="si">%d</span><span class="s"> gridpoints"</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">scatter_grid_2</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">n_gridpoints</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">get_num_dimensions</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_transform_AB</span><span class="p">()</span>   
+    <span class="n">grid1</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">low</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">high</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_gridpoints</span><span class="p">)</span>
+    <span class="n">grid2</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">low</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">high</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">n_gridpoints</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">xlists</span><span class="p">,</span> <span class="n">f_list</span><span class="p">)</span> <span class="o">=</span> <span class="n">apply_fn_to_grid</span><span class="p">([</span><span class="n">grid1</span><span class="p">,</span> <span class="n">grid2</span><span class="p">],</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">grid</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">Axes3D</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>    
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter3D</span><span class="p">(</span><span class="n">xlists</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xlists</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">f_list</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> 
+    <span class="k">return</span> <span class="n">ax</span>
+
+<span class="n">grid</span> <span class="o">=</span> <span class="n">tsg</span><span class="o">.</span><span class="n">TSG</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">fn1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>     <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">scipy</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">dimension</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">outputs</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">precision</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">make_global_grid</span><span class="p">(</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">precision</span><span class="p">,</span> <span class="n">tsg</span><span class="o">.</span><span class="n">TypeDepth</span><span class="o">.</span><span class="n">type_basis</span><span class="p">,</span> <span class="n">tsg</span><span class="o">.</span><span class="n">TypeOneDRule</span><span class="o">.</span><span class="n">rule_clenshawcurtis</span><span class="p">,</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="n">points</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_needed_points</span><span class="p">()</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">fn1</span><span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">load_needed_points</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+<span class="n">plot_gridpoints_2</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="n">scatter_grid_2</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+</pre></div>
+
+<p>produces
+<img src="https://raw.github.com/rncarpio/py_tsg/master/example1.png" alt=""><img src="https://raw.github.com/rncarpio/py_tsg/master/example2.png" alt=""></p>
+
+<h3>
+<a name="license-gplv3" class="anchor" href="#license-gplv3"><span class="octicon octicon-link"></span></a>License: GPLv3</h3>
+
+<p><code>py_tsg</code> is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+
+<p>This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</p>
+
+<p>You should have received a copy of the GNU General Public License
+along with this program.  If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.   </p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">py_tsg maintained by <a href="https://github.com/rncarpio">rncarpio</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-27074418-2");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
