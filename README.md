@@ -1,12 +1,10 @@
 Project page: http://rncarpio.github.com/py_tsg
 
-A Python wrapper around the Tasmanian sparse grid library
-
 ### What is `py_tsg`?
 `py_tsg` is a Python wrapper around the [Tasmanian Sparse Grid Library (TSG)](http://tasmanian.ornl.gov/) for high-dimensional interpolation and integration using sparse grids (e.g. Smolyak grids).  TSG is written in C++ and supports a variety of polynomial basis functions, anisotropic weights, and adaptive local refinement.
 For more information on TSG, visit http://tasmanian.ornl.gov/ or look at the [manual](http://tasmanian.ornl.gov/manuals.html).
 
-This version is based on [v1.0, released August 2013](http://tasmanian.ornl.gov/downloads.html). The code has been slightly modified to compile under Windows. The PYthon wrapper requires [Boost.Python](http://www.boost.org/doc/libs/1_55_0/libs/python/doc/index.html) and [PyUblas](http://mathema.tician.de/software/pyublas/) to be installed.
+This version is based on [TSG v1.0, released August 2013](http://tasmanian.ornl.gov/downloads.html). The code has been slightly modified to compile under Windows. The Python wrapper requires [Boost.Python](http://www.boost.org/doc/libs/1_55_0/libs/python/doc/index.html) and [PyUblas](http://mathema.tician.de/software/pyublas/) to be installed.
 
 ### Installation
 Assuming you have [Boost.Python](http://www.boost.org/doc/libs/1_55_0/libs/python/doc/index.html) and [PyUblas](http://mathema.tician.de/software/pyublas/) already installed, download the files and type `make all`. The makefile should handle both Linux and Windows (tested with MSVC 2010). A shared library `libtasmaniansparsegrid.so` or its Windows equivalent should be produced; set your paths to detect this. Another shared library `_py_tsg.so` or `_py_tsg.pyd` should be produced; from Python, you can type `import _py_tsg`.
