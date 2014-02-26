@@ -1,14 +1,23 @@
 //
-// Copyright (c) 2012 Ronaldo Carpio
+// Copyright (c) 2014 Ronaldo Carpio
 //                                     
-// Permission to use, copy, modify, distribute and sell this software
-// and its documentation for any purpose is hereby granted without fee,
-// provided that the above copyright notice appear in all copies and   
-// that both that copyright notice and this permission notice appear
-// in supporting documentation.  The authors make no representations
-// about the suitability of this software for any purpose.          
-// It is provided "as is" without express or implied warranty.
-//                                                            
+
+/*
+	This file is part of py_tsg.
+
+    py_tsg is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/                                                  
 
 #include <TasmanianSparseGrids/TasmanianSparseGrid.hpp>
 #include <Python.h>
