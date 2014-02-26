@@ -119,8 +119,7 @@ def test1():
 # return an array of fn applied to each grid point in gridList. last elt of gridList will be the innermost loop
 def apply_fn_to_grid(gridList, fn):
 	xy_list = list(itertools.product(*gridList))
-	xlists = []
-	#f0 = fn(xy_list[0])
+	xlists = []	
 	[xlists.append( [xy[i] for xy in xy_list] ) for i in range(len(gridList))]
 	f_list = [fn(xy) for xy in xy_list]
 	return (xlists, f_list)
